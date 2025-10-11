@@ -49,6 +49,9 @@ OAFFORD_LEMON_PIAD_MODEL_URL='https://download.is.tue.mpg.de/download.php?domain
 H2DCONTACT_MODEL_URL='https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=interactvlm-2d-hcontact.zip'
 HCONTACT_OCONTACT_MODEL_URL='https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=interactvlm-3d-hcontact-ocontact.zip'
 DAMON_DATASET_URL='https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=damon.tar.gz'
+LEMON_DATASET_URL='https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=lemon.tar.gz'
+PIAD_OCONTACT_DATASET_URL='https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=piad_ocontact_seen.tar.gz'
+PICO_DATASET_URL='https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=pico.tar.gz'
 OPTIM_DEMO_DATA_URL='https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=optim_data.zip'
 
 # Check command line arguments
@@ -63,6 +66,18 @@ elif [ "$1" = "damon-dataset" ]; then
     # damon-dataset argument provided - download only that file
     echo "Downloading DAMON dataset only..."
     download_and_extract_targz "$DAMON_DATASET_URL"
+elif [ "$1" = "lemon-dataset" ]; then
+    # lemon-dataset argument provided - download only that file
+    echo "Downloading LEMON dataset only..."
+    download_and_extract_targz "$LEMON_DATASET_URL"
+elif [ "$1" = "piad-ocontact-dataset" ]; then
+    # piad-ocontact-dataset argument provided - download only that file
+    echo "Downloading PIAD Object Contact dataset only..."
+    download_and_extract_targz "$PIAD_OCONTACT_DATASET_URL"
+elif [ "$1" = "pico-dataset" ]; then
+    # pico-dataset argument provided - download only that file
+    echo "Downloading PICO dataset only..."
+    download_and_extract_targz "$PICO_DATASET_URL"
 elif [ "$1" = "hcontact-wScene" ]; then
     # hcontact-wScene argument provided - download the specific model
     echo "Downloading Human Contact with Scene model..."
@@ -81,11 +96,15 @@ elif [ "$1" = "optim-demo-data" ]; then
     download_and_unzip "$OPTIM_DEMO_DATA_URL"
 else
     echo "Unknown argument: $1"
-    echo "Usage: $0 [damon-dataset|hcontact-wScene|h2dcontact|joint-reconstruction|optim-demo-data]"
+    echo "Usage: $0 [damon-dataset|lemon-dataset|piad-ocontact-dataset|pico-dataset|hcontact-wScene|h2dcontact|joint-reconstruction|optim-demo-data]"
     echo "  No argument: Downloads all model files (data.zip, interactvlm-3d-hcontact-damon.zip, interactvlm-3d-oafford-lemon-piad.zip, interactvlm-2d-hcontact.zip)"
     echo "  damon-dataset: Downloads only damon.tar.gz dataset"
+    echo "  lemon-dataset: Downloads only lemon.tar.gz dataset"
+    echo "  piad-ocontact-dataset: Downloads only piad_ocontact_seen.tar.gz dataset"
+    echo "  pico-dataset: Downloads only pico.tar.gz dataset"
     echo "  hcontact-wScene: Downloads interactvlm-3d-hcontact-wScene-damon-lemon-rich.zip"
     echo "  h2dcontact: Downloads interactvlm-2d-hcontact.zip"
     echo "  joint-reconstruction: Downloads interactvlm-3d-hcontact-ocontact.zip"
+    echo "  optim-demo-data: Downloads optim_data.zip for optimization demo"
     exit 1
 fi

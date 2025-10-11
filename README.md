@@ -272,8 +272,15 @@ The demo supports two input structures:
 
 ### 🔧 Data Generation
 
-To generate the data needed for training, run the following script. For now, we provide preprocessed dataset for DAMON. We will soon release for LEMON, PIAD and PICO.
+To generate the data needed for training, run the following script. We also provide preprocessed dataset for DAMON, LEMON, PIAD and PICO. Run `fetch_data.sh` file with approriate params to download the preprocessed data.
 
+**Available Preprocessed Datasets:**
+- **[DAMON](https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=damon.tar.gz)** - Human contact annotations from DAMON dataset
+- **[LEMON](https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=lemon.tar.gz)** - Human-object interaction data from LEMON dataset
+- **[PIAD](https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=piad_ocontact_seen.tar.gz)** - Object affordance annotations from PIAD dataset
+- **[PICO](https://download.is.tue.mpg.de/download.php?domain=interactvlm&sfile=pico.tar.gz)** - Object Contact data from PICO dataset
+
+To generate yourself, run the following command,
 ```bash
 # Generate preprocessed data
 bash scripts/run_datagen.sh
@@ -290,6 +297,7 @@ bash fetch_data.sh damon-dataset
 # Train human contact with DAMON dataset
 bash scripts/run_train.sh hcontact-damon
 ```
+
 
 ### 📊 Evaluation
 
@@ -313,7 +321,7 @@ bash scripts/run_eval.sh
 - **3D Human Contact Estimation** - Training, evaluation, and demo code available
 - **3D Object Contact/Affordance Estimation** - Training, evaluation, and demo code available
 - **Object Shape Retrieval from Single Image** - Code available at [Object_Retrieval](https://github.com/saidwivedi/Object_Retrieval)
-- **Optimization Framework for Joint Reconstruction** - Code available at [`optim/`](optim/README.md)
+- **Optimization Framework for Joint Reconstruction** - Code available at [`optim`](optim/README.md)
 
 <!-- ### 📅 **Pending** -->
 
@@ -343,13 +351,11 @@ InteractVLM builds upon several excellent open-source projects and datasets:
 - **[Blendify](https://github.com/ptrvilya/blendify/)** - For rendering
 
 ### Optimization Framework
-Our optimization framework integrates the following repositories (see [`optim/`](optim/README.md) for details):
+Our optimization framework integrates the following repositories (see [`optim`](optim/README.md) for details):
 
 - **[OpenShape](https://github.com/Colin97/OpenShape_code)** - For object shape retrieval
 - **[OSX](https://github.com/IDEA-Research/OSX)** - For SMPLX human pose estimation  
 - **[Grounded-SAM](https://github.com/IDEA-Research/Grounded-Segment-Anything)** - For object detection and segmentation
-
-
 
 ## 📝 Citation
 If you find this code useful for your research, please consider citing the following paper:
