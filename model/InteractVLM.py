@@ -15,7 +15,9 @@ from .components import HumanContact3DPredictor, ObjectPCAfford3DPredictor, Obje
 from .components import CamPoseEncoder, ViewIndexCamPoseEncoder, VIv1CamPoseEncoder
 from .components import get_initial_weights, check_weight_changes
 from .losses import CombinedLoss
+from tinytools import get_logger
 
+logger = get_logger(__name__)
 
 class ModifiedSAM(nn.Module):
     def __init__(self, original_sam, use_diff_decoder, use_fusion=False, use_uncertainty=False):
@@ -31,10 +33,10 @@ class ModifiedSAM(nn.Module):
             self.human_mask_decoder = original_sam.mask_decoder
             self.object_mask_decoder = original_sam.mask_decoder
         if use_fusion:
-            print("Using LLaVASAMFusion for feature fusion")
+            logger.info("Using LLaVASAMFusion for feature fusion")
             self.fusion = LLaVASAMFusion()
         if use_uncertainty:
-            print("Using UncertaintyModule for uncertainty estimation")
+            logger.info("Using UncertaintyModule for uncertainty estimation")
             self.uncertainty = UncertaintyModule()
     
     def forward(self, image_embeddings, llava_features, sparse_prompt_embeddings, dense_prompt_embeddings, ds_name=None):
@@ -203,25 +205,25 @@ class InteractVLMForCausalLM(LlavaLlamaForCausalLM):
         self.model = InteractVLMModel(config, **kwargs)
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
-        print(f'config type {type(config)}')
+        logger.info('config type %s', type(config))
         self.cam_encoder_type = config.cam_encoder_type
 
         self.human_3d_contact_predictor, self.object_3d_afford_predictor, self.object_3d_contact_predictor = None, None, None
-        print(f'Model configs: {config}')
-        print(f'Adding extra modules for InteractVLM')
+        logger.info('Model configs: %s', config)
+        logger.info('Adding extra modules for InteractVLM')
         if self.base_token_type in ['Gen-Hu-Obj', 'Gen-Int']:
-            print(f'\t---> Adding AttentionSplitter for token_type: {self.base_token_type}')
+            logger.info('\t---> Adding AttentionSplitter for token_type: %s', self.base_token_type)
             self.attention_splitter = AttentionSplitter()
         if self.hC_loss_weight > 0:
-            print(f'\t---> Adding HumanContact3DPredictor for hC_loss_weight: {self.hC_loss_weight}')
+            logger.info('\t---> Adding HumanContact3DPredictor for hC_loss_weight: %s', self.hC_loss_weight)
             self.human_3d_contact_predictor = HumanContact3DPredictor(self.hC_sam_view_type, self.multiview_channels)
         if self.oC_loss_weight > 0:
-            print(f'\t---> Adding ObjectAfford3DPredictor for oC_loss_weight: {self.oC_loss_weight}')
+            logger.info('\t---> Adding ObjectAfford3DPredictor for oC_loss_weight: %s', self.oC_loss_weight)
             self.object_3d_afford_predictor = ObjectPCAfford3DPredictor(self.oC_sam_view_type, self.multiview_channels)
-            print(f'\t---> Adding ObjectContact3DPredictor for oC_loss_weight: {self.oC_loss_weight}')
+            logger.info('\t---> Adding ObjectContact3DPredictor for oC_loss_weight: %s', self.oC_loss_weight)
             self.object_3d_contact_predictor = ObjectMeshContact3DPredictor(self.oC_sam_view_type, self.multiview_channels)
         if self.multiview_cam_cond:
-            print(f'\t---> Adding CamPoseEncoder {self.cam_encoder_type} for multiview_cam_cond: {self.multiview_cam_cond}')
+            logger.info('\t---> Adding CamPoseEncoder %s for multiview_cam_cond: %s', self.cam_encoder_type, self.multiview_cam_cond)
             if self.cam_encoder_type == 'simple':
                 self.cam_pose_encoder = CamPoseEncoder()
             elif self.cam_encoder_type == 'view_index':

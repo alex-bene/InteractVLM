@@ -18,6 +18,9 @@ from smplx import build_layer
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'preprocess_data'))
 from render_mesh_utils import project_vertices_and_create_mask, get_rasterizer
+from tinytools import get_logger
+
+logger = get_logger(__name__)
 
 # Constants
 LIGHT_LOCATIONS = [[0, 0, 3], [0, 0, 3], [0, 0, -3], [0, 0, -3]]
@@ -65,7 +68,7 @@ def process_smplx_mesh_with_contacts(contact_vertices_smplx, output_path, contac
             
             num_contact_vertices = np.sum(contact_mask)
         else:
-            print(f'Warning: Contact vertices shape {contact_vertices_smplx.shape} does not match SMPLX vertices {vertices.shape[0]}')
+            logger.warning('Warning: Contact vertices shape %s does not match SMPLX vertices %s', contact_vertices_smplx.shape, vertices.shape[0])
     
     # Create colored mesh
     colored_mesh = trimesh.Trimesh(
@@ -77,7 +80,7 @@ def process_smplx_mesh_with_contacts(contact_vertices_smplx, output_path, contac
     # Save the colored mesh
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     colored_mesh.export(output_path)
-    print(f'Saved SMPLX body mesh with human contact vertices colored red: {output_path}')
+    logger.debug('Saved SMPLX body mesh with human contact vertices colored red: %s', output_path)
 
 
 def process_object_mesh_with_contacts(obj_path, contact_vertices, output_path, contact_threshold=0.5):
@@ -109,7 +112,7 @@ def process_object_mesh_with_contacts(obj_path, contact_vertices, output_path, c
                 vertex_colors[contact_indices] = [1.0, 0.1, 0.1]  # Red
         
         else:
-            print(f'Warning: Contact vertices shape {contact_vertices.shape} does not match mesh vertices {num_vertices}')
+            logger.warning('Warning: Contact vertices shape %s does not match mesh vertices %s', contact_vertices.shape, num_vertices)
     
     # Create a new mesh with colors
     colored_mesh = trimesh.Trimesh(
@@ -120,7 +123,7 @@ def process_object_mesh_with_contacts(obj_path, contact_vertices, output_path, c
     
     # Save the colored mesh
     colored_mesh.export(output_path)
-    print(f'Saved object mesh with contact vertices colored red: {output_path}')
+    logger.debug('Saved object mesh with contact vertices colored red: %s', output_path)
     
 
 
@@ -170,13 +173,13 @@ def render_mesh(mesh, camera_params, light_location, image_size=(512, 512), devi
 
 def generate_sam_inp_objs(obj_mesh_f):
     
-    print(f'Generating sam_inp_objs for {obj_mesh_f}')
+    logger.debug('Generating sam_inp_objs for %s', obj_mesh_f)
     
     base_folder = os.path.dirname(obj_mesh_f)
     sam_inp_objs = os.path.join(base_folder, 'sam_inp_objs')
     
     if os.path.exists(sam_inp_objs):
-        print(f'sam_inp_objs already exists at {sam_inp_objs}')
+        logger.debug('sam_inp_objs already exists at %s', sam_inp_objs)
         return
     
     os.makedirs(sam_inp_objs, exist_ok=True)
@@ -246,10 +249,10 @@ def generate_sam_inp_objs(obj_mesh_f):
         }
         jl.dump(lifting_dict, os.path.join(sam_inp_objs, 'lift2d_dict.pkl'))
         
-        print(f'Successfully generated sam_inp_objs at {sam_inp_objs}')
+        logger.debug('Successfully generated sam_inp_objs at %s', sam_inp_objs)
         
     except Exception as e:
-        print(f'Error generating sam_inp_objs for {obj_mesh_f}: {str(e)}')
+        logger.exception('Error generating sam_inp_objs for %s', obj_mesh_f)
         # Clean up partial results
         if os.path.exists(sam_inp_objs):
             import shutil

@@ -16,16 +16,16 @@ init:
   icp:
     run: True
     filter_contacts: [True,90,-90]  # * Filter out contacts if the angle difference is less than param[1] degrees
-    est_scale: False
-    max_iter: 10
+    est_scale: True
+    max_iter: 50
 
 # * Optim
 optim_name: adam                    # * adam, sgd
-max_iter: 250                       # * Max iterations for optimization
-vars: [pose]                        # * Choose from: pose, scale
+max_iter: 500                       # * Max iterations for optimization
+vars: [pose, scale]                        # * Choose from: pose, scale
 
 # * Losses
-en_scale_loss: False
+en_scale_loss: True # does nothing
 loss_weights:
   mask_loss: 
     w: 5.0e+0

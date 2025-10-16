@@ -4,5 +4,7 @@ runs/
 debug/
 data/
 output/
-optim_data/
-
+optim_data*/
+.cache
+outputs_demo_optim
+trained_models

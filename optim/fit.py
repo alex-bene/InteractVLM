@@ -62,7 +62,7 @@ def main(input_path: Path, opt: EasierDict):
 
     logging.info(f"\nProcessing {input_path}")
     if opt.out_root is None:
-        output_dir = input_path / "results"
+        output_dir = input_path.parent / "optim_fit_results"
     else:
         output_dir = Path(opt.out_root) / f"{input_path.parts[-1]}"
     output_dir.mkdir(exist_ok=True, parents=True)
@@ -99,6 +99,10 @@ def main(input_path: Path, opt: EasierDict):
     rotation_init = matrix_to_rot6d(torch.eye(3).unsqueeze(0)).cuda()
     translation_init = torch.tensor([0.0, 0.0, 0.0]).cuda()
     scaling_init = torch.tensor([object_params.scale]).cuda()
+    if Path(input_path).with_name("estimated_scale.txt").exists():
+        with input_path.with_name("estimated_scale.txt").open() as f:
+            scaling_init = torch.tensor([float(f.read())]).cuda()
+            logging.info("Loaded initial scale estimation from %s", input_path.with_name("estimated_scale.txt"))
 
     start_time = time.time()
 
@@ -191,6 +195,7 @@ def main(input_path: Path, opt: EasierDict):
 
         rotation_init = matrix_to_rot6d(icp_solution.RTs.R)
         translation_init = icp_solution.RTs.T.squeeze()
+        scaling_init = icp_solution.RTs.s.squeeze()
 
     logging.info(f"Initial guess: {rotation_init=}, {translation_init=}, {scaling_init=}")
     logging.info(f"Optimizing: {opt.vars}")
@@ -313,13 +318,14 @@ def main(input_path: Path, opt: EasierDict):
         )
         if opt.log_video:
             vwriter.close()
+    logging.info("Saved results to %s", output_dir)
 
 
 if __name__ == "__main__":
     args = ArgumentParser()
     args.add_argument("--input_path", type=Path, required=True)
     args.add_argument("--cfg", type=Path, required=True)
-    args.add_argument("--out_root", type=str, default=None)
+    # args.add_argument("--out_root", type=str, default=None)
 
     # Add any extra args that will be parsed by OmegaConf
     args, remaining_args = args.parse_known_args()
@@ -335,8 +341,8 @@ if __name__ == "__main__":
     cfg = OmegaConf.merge(conf, cleaned_cli_conf)
 
     # Override out_root from ArgumentParser if provided
-    if args.out_root is not None:
-        cfg.out_root = args.out_root
+    # if args.out_root is not None:
+    cfg.out_root = None
 
     opt = EasierDict(OmegaConf.to_container(cfg, resolve=True))
 

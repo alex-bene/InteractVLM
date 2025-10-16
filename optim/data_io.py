@@ -148,17 +148,18 @@ def load_params(
 
     faces = human_npz["smpl_faces"].astype(int)
 
-    hum_contacts = np.load(join(root_folder, "hcontact_vertices.npz"))["pred_contact_3d_smplx"]
+    if os.path.exists(join(root_folder, "hcontact_vertices.npz")):
+        hum_contacts = np.load(join(root_folder, "hcontact_vertices.npz"))["pred_contact_3d_smplx"]
+    else:  # os.path.exists(join(root_folder, "f0_hcontact_vertices.npz")):
+        hum_contacts = np.load(join(root_folder, "f0_hcontact_vertices.npz"))["pred_contact_3d_smplx"]
+
     if os.path.isfile(join(root_folder, "human_mask.png")):
         human_mask = load_image(
             join(root_folder, "human_mask.png"),
             im_type_flag=cv2.COLOR_BGR2GRAY,
         )
     else:
-        human_mask = np.array(
-            json.load(open(join(root_folder, "human_detection.json"), "r"))["mask"],
-            dtype=np.uint8,
-        )
+        human_mask = np.array(json.load(open(join(root_folder, "human_detection.json")))["mask"], dtype=np.uint8)
 
         cv2.imwrite(join(root_folder, "human_mask.png"), human_mask * 255)
 
@@ -193,23 +194,43 @@ def load_params(
     obj_mesh.vertices[:, 1] *= -1
     obj_mesh.vertices[:, 2] *= -1
 
-    detection = json.load(open(object_detection_file, "r"))
-
     root_folder = dirname(object_detection_file)
-    object_contact_verts = np.load(join(root_folder, "ocontact_vertices.npz"))["pred_contact_3d"]
+    if os.path.exists(join(root_folder, "ocontact_vertices.npz")):
+        object_contact_verts = np.load(join(root_folder, "ocontact_vertices.npz"))["pred_contact_3d"]
+    elif os.path.exists(join(root_folder, "f0_ocontact_vertices.npz")):
+        object_contact_verts = np.load(join(root_folder, "f0_ocontact_vertices.npz"))["pred_contact_3d"]
+    elif os.path.exists(join(root_folder, "oafford_vertices.npz")):
+        object_contact_verts = np.load(join(root_folder, "oafford_vertices.npz"))["pred_contact_3d"]
+    else:
+        object_contact_verts = np.load(join(root_folder, "f0_oafford_vertices.npz"))["pred_contact_3d"]
+
     if len(object_contact_verts.shape) == 2:
         object_contact_verts = object_contact_verts.squeeze(0)
 
-    if os.path.exists(join(root_folder, "object_mask.png")):
-        obj_mask = load_image(join(root_folder, "object_mask.png"), im_type_flag=cv2.COLOR_BGR2GRAY)
-    else:
+    if os.path.exists(object_detection_file):
+        detection = json.load(open(object_detection_file))
+        bbox = np.array(detection["bbox"])
         obj_mask = np.array(detection["mask"], dtype=np.uint8).squeeze()
+    elif os.path.exists(join(root_folder, "object_mask.png")):
+        obj_mask = load_image(join(root_folder, "object_mask.png"), im_type_flag=cv2.COLOR_BGR2GRAY)
+        # infer bbox from mask without cv2
+        bbox = np.array(
+            [
+                obj_mask.nonzero()[1].min(),
+                obj_mask.nonzero()[1].max(),
+                obj_mask.nonzero()[0].min(),
+                obj_mask.nonzero()[0].max(),
+            ]
+        )
+    else:
+        msg = "No object mask found"
+        raise ValueError(msg)
 
     object_params = ObjectParams(
         vertices=obj_mesh.vertices,
         faces=obj_mesh.faces,
         contact_verts=object_contact_verts,
-        bbox=np.array(detection["bbox"]),
+        bbox=bbox,
         mask=obj_mask,
         scale=np.array([1.0]),
     )

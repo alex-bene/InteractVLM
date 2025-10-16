@@ -16,6 +16,9 @@ sys.path.append(data_path)
 
 from preprocess_data.constants import HUMAN_VIEW_DICT, OBJS_VIEW_DICT
 from utils.utils import debug_tensor
+from tinytools import get_logger
+
+logger = get_logger(__name__)
 
 def get_initial_weights(model):
     initial_weights = {name: param.detach().cpu() for name, param in model.named_parameters()}
@@ -393,7 +396,7 @@ class ObjectMeshContact3DPredictor(nn.Module):
         pixel_to_vertex_maps = np.stack(lift2d_dict['pixel_to_vertices_map'])
         bary_coord_maps = np.stack(lift2d_dict['bary_coords_map'])
 
-        print(f"Num vertices: {num_vertices}")
+        logger.debug("Num vertices: %s", num_vertices)
 
         pred_3d_contacts = torch.zeros((batch_size, num_vertices), device=device, dtype=dtype)
         view_count = torch.zeros((batch_size, num_vertices), device=device, dtype=dtype)
